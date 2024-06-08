@@ -1,130 +1,109 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Button, TextField, IconButton, Typography, Modal } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
-import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
-import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { tokens } from "../../../theme";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
+import { tokens } from "../../../theme";
 
 const Article = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const [users, setUsers] = useState([]);
+  const [articles, setArticles] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchArticles = async () => {
       try {
-        const response = await axios.get("/user/all-users");
-        setUsers(response.data.users);
+        const response = await axios.get("http://localhost:5000/api/v1/article/all-articles");
+        setArticles(response.data);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching articles:", error);
       }
     };
 
-    fetchUsers();
-  }, [users]);
+    fetchArticles();
+  }, []);
 
   const handleDelete = async (id) => {
-  try {
-      await axios.delete('/user/delete', { data: { id } });  // Sending the user ID in the request body
+    try {
+      await axios.delete(`http://localhost:5000/api/v1/article/delete-articles/${id}`);
+      setArticles(articles.filter(article => article._id !== id));
+      toast.success("Article Deleted Successfully");
+    } catch (error) {
+      console.error("Error deleting article:", error);
+    }
+  };
 
-    setUsers(users.filter(user => !user.userId));
-    toast.success(" User Deleted  Successfully");
-  } catch (error) {
-    console.error("Error deleting user:", error);
-  }
-};
+  const handleAddArticle = async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/api/v1/article/create-articles", { title, content });
+      setArticles([...articles, response.data]);
+      setTitle("");
+      setContent("");
+      setOpen(false);
+      toast.success("Article Added Successfully");
+    } catch (error) {
+      console.error("Error adding article:", error);
+    }
+  };
 
-// Your columns configuration remains the same
-const columns = [
-  { field: "id", headerName: "ID", flex: 0.5 },
-  {
-    field: "name",
-    headerName: "Name",
-    flex: 1,
-    cellClassName: "name-column--cell",
-  },
-  {
-    field: "age",
-    headerName: "Age",
-    type: "number",
-    headerAlign: "left",
-    align: "left",
-  },
-  {
-    field: "phone",
-    headerName: "Phone Number",
-    flex: 1,
-  },
-  {
-    field: "email",
-    headerName: "Email",
-    flex: 1,
-  },
-  {
-    field: "accessLevel",
-    headerName: "Access Level",
-    flex: 1,
-    renderCell: ({ row }) => {
-      return (
-        <Box
-          width="60%"
-          m="0 auto"
-          p="5px"
-          display="flex"
-          justifyContent="center"
-          backgroundColor={
-            row.isAdmin
-              ? colors.greenAccent[600]
-              : colors.greenAccent[700]
-          }
-          borderRadius="4px"
-        >
-          {row.isAdmin ? (
-            <AdminPanelSettingsOutlinedIcon />
-          ) : (
-            <LockOpenOutlinedIcon />
-          )}
-          <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-            {row.isAdmin ? "admin" : "user"}
-          </Typography>
-        </Box>
-      );
+  const columns = [
+    { field: "_id", headerName: "ID", flex: 0.5 },
+    {
+      field: "title",
+      headerName: "Title",
+      flex: 1,
+      cellClassName: "name-column--cell",
     },
-  },
-  {
-    field: "_id",
-    headerName: "Delete",
-    flex: 0.5,
-    renderCell: ({ row }) => {
-      return (
-        <IconButton
-          onClick={() => handleDelete(row._id)}
-          color="secondary"
-          aria-label="delete"
-        >
-          <DeleteIcon />
-        </IconButton>
-      );
+    {
+      field: "content",
+      headerName: "Content",
+      flex: 2,
     },
-  },
-];
+    {
+      field: "createdAt",
+      headerName: "Created At",
+      flex: 1,
+      renderCell: ({ value }) => {
+        const date = new Date(value);
+        return date.toLocaleDateString();
+      },
+    },
+    {
+      field: "delete",
+      headerName: "Delete",
+      flex: 0.5,
+      renderCell: ({ row }) => {
+        return (
+          <IconButton
+            onClick={() => handleDelete(row._id)}
+            color="secondary"
+            aria-label="delete"
+          >
+            <DeleteIcon />
+          </IconButton>
+        );
+      },
+    },
+  ];
 
-
-  const rows = users.map((user, index) => ({
-    id: index + 1, // Generate IDs from 1 to the number of users
-    ...user,
+  const rows = articles.map((article, index) => ({
+    id: index + 1,
+    ...article,
   }));
 
   return (
     <Box m="20px">
-      <Header title="TEAM" subtitle="Managing the Team Members" />
+      <Header title="ARTICLES" subtitle="Managing the Articles" />
+      <Button onClick={() => setOpen(true)} variant="contained" color="primary">
+        Add New Article
+      </Button>
       <Box
         m="40px 0 0 0"
         height="75vh"
@@ -163,8 +142,49 @@ const columns = [
           components={{ Toolbar: GridToolbar }}
         />
       </Box>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Add New Article
+          </Typography>
+          <TextField
+            fullWidth
+            label="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+          <Button onClick={handleAddArticle} variant="contained" color="primary" sx={{ mt: 2 }}>
+            Add Article
+          </Button>
+        </Box>
+      </Modal>
     </Box>
   );
 };
 
 export default Article;
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
