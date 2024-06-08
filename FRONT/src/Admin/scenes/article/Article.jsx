@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { Box, Button, TextField, IconButton, Typography, Modal } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
@@ -14,6 +15,8 @@ const Article = () => {
 
   const [articles, setArticles] = useState([]);
   const [open, setOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
@@ -53,6 +56,29 @@ const Article = () => {
     }
   };
 
+  const handleEditArticle = async () => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/v1/article/update-articles/${selectedArticle._id}`, { title, content });
+      setArticles(articles.map(article => article._id === selectedArticle._id ? response.data : article));
+      setTitle("");
+      setContent("");
+      setOpen(false);
+      setEditMode(false);
+      setSelectedArticle(null);
+      toast.success("Article Updated Successfully");
+    } catch (error) {
+      console.error("Error updating article:", error);
+    }
+  };
+
+  const handleOpenEditModal = (article) => {
+    setSelectedArticle(article);
+    setTitle(article.title);
+    setContent(article.content);
+    setEditMode(true);
+    setOpen(true);
+  };
+
   const columns = [
     { field: "_id", headerName: "ID", flex: 0.5 },
     {
@@ -73,6 +99,22 @@ const Article = () => {
       renderCell: ({ value }) => {
         const date = new Date(value);
         return date.toLocaleDateString();
+      },
+    },
+    {
+      field: "edit",
+      headerName: "Edit",
+      flex: 0.5,
+      renderCell: ({ row }) => {
+        return (
+          <IconButton
+            onClick={() => handleOpenEditModal(row)}
+            color="primary"
+            aria-label="edit"
+          >
+            <EditIcon />
+          </IconButton>
+        );
       },
     },
     {
@@ -101,7 +143,7 @@ const Article = () => {
   return (
     <Box m="20px">
       <Header title="ARTICLES" subtitle="Managing the Articles" />
-      <Button onClick={() => setOpen(true)} variant="contained" color="primary">
+      <Button onClick={() => { setOpen(true); setEditMode(false); }} variant="contained" color="primary">
         Add New Article
       </Button>
       <Box
@@ -150,7 +192,7 @@ const Article = () => {
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Add New Article
+            {editMode ? "Edit Article" : "Add New Article"}
           </Typography>
           <TextField
             fullWidth
@@ -166,8 +208,8 @@ const Article = () => {
             onChange={(e) => setContent(e.target.value)}
             sx={{ mt: 2 }}
           />
-          <Button onClick={handleAddArticle} variant="contained" color="primary" sx={{ mt: 2 }}>
-            Add Article
+          <Button onClick={editMode ? handleEditArticle : handleAddArticle} variant="contained" color="primary" sx={{ mt: 2 }}>
+            {editMode ? "Update Article" : "Add Article"}
           </Button>
         </Box>
       </Modal>
