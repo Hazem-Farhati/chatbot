@@ -1,0 +1,28 @@
+.sous-article{
+    /* background-color: red; */
+    width: 90%;
+    margin: 0 auto;
+}
+.sous-a-title{
+    width: 100%;
+}
+.sous-adetails{
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 20px;
+}
+.sous-adetails .sous-a-content{
+    width: 50%;
+    height: max-content;
+}
+.sous-adetails .sous-a-content p{
+   font-size: 20px;
+  
+}
+.sous-adetails .sous-a-image{
+    width: 40%;
+  }
+.sous-adetails .sous-a-image img{
+   width: 100%;
+ }

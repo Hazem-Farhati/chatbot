@@ -62,3 +62,35 @@ export const deleteArticle = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+export const demande = async (req, res) => {
+    try {
+        let result = await Article.findByIdAndUpdate(
+            { _id: req.params.id },
+            { $set: { inscri: req.body.inscri } },
+            { new: true }
+        );
+        res.send({ msg: "article is updated" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ msg: "Error updating article", error });
+    }
+};
+
+  
+  
+
+export const userliste = async (req, res) => {
+    try {
+        let result = await Article.findByIdAndUpdate(
+            { _id: req.params.id },
+            { $set: { userlist: req.body.userlist } },
+            { new: true }
+        );
+        res.send({ msg: "article is updated" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ msg: "Error updating article", error });
+    }
+};

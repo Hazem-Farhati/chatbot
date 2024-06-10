@@ -1,7 +1,7 @@
 
 import  React ,{ useState } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../../theme";
@@ -18,10 +18,12 @@ import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import AdminPhoto from "`../../../assets/img/faces/marc.jpg`";
+import { useAuth } from '../../../context/AuthContext';
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
   return (
     <MenuItem
       active={selected === title}
@@ -42,6 +44,7 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  const auth = useAuth();
 
   return (
     <Box
@@ -201,6 +204,10 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
+          </Box>
+          <Box p={2}>
+            <Typography>Admin ,Would you Like to Disconnect?</Typography>
+            <Button varian="contained" color="secondary" onClick={auth.logout}>Logout</Button>
           </Box>
         </Menu>
       </ProSidebar>

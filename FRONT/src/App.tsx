@@ -27,6 +27,9 @@ import Sidebar from "./Admin/scenes/global/Sidebar";
 import Topbar from "./Admin/scenes/global/Topbar";
 import { ThemedApp } from './theme';
 // import Article from './Admin/article/Article';
+import AllArticals from './pages/AllArticals';
+import SousArticalDetails from './pages/SousArticalDetails';
+import ArticleUser from './Admin/scenes/article/ArticleUser';
 
 function App() {
     const auth = useAuth();
@@ -51,7 +54,7 @@ function App() {
 
                           <Route path="/admin/users" element={<Users />} />
                           <Route path="/admin/article" element={<Article />} />
-
+                          <Route path="/admin/article-user" element={<ArticleUser />} />
                           <Route path="/admin/form" element={<Form />} />
                           <Route path="/admin/bar" element={<Bar />} />
                           <Route path="/admin/pie" element={<Pie />} />
@@ -65,6 +68,9 @@ function App() {
                       <>
                           <Route path="/chat" element={<Chat />} />
                           <Route path="/all-chats" element={<AllChats />} />
+                          <Route path="/all-articals" element={<AllArticals />} />
+                          <Route path="/all-articals-deatails/:id" element={<SousArticalDetails />} />
+
                       </>
                   )}
                   <Route path="*" element={<NotFound />} />

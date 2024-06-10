@@ -10,6 +10,7 @@ import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
 import SousArticle from "./SousArticle";
+import ArticleUser from "./ArticleUser";
 
 const Article = () => {
   const theme = useTheme();
@@ -83,20 +84,20 @@ const Article = () => {
       flex: 1,
       cellClassName: "name-column--cell",
     },
-    {
-      field: "content",
-      headerName: "Content",
-      flex: 2,
-    },
-    {
-      field: "createdAt",
-      headerName: "Created At",
-      flex: 1,
-      renderCell: ({ value }) => {
-        const date = new Date(value);
-        return date.toLocaleDateString();
-      },
-    },
+    // {
+    //   field: "content",
+    //   headerName: "Content",
+    //   flex: 2,
+    // },
+    // {
+    //   field: "createdAt",
+    //   headerName: "Created At",
+    //   flex: 1,
+    //   renderCell: ({ value }) => {
+    //     const date = new Date(value);
+    //     return date.toLocaleDateString();
+    //   },
+    // },
     {
       field: "sousArticles",
       headerName: "Sous Articles",
@@ -218,25 +219,29 @@ const Article = () => {
             onChange={(e) => setTitle(e.target.value)}
             sx={{ mt: 2 }}
           />
-          <TextField
+          {/* <TextField
             fullWidth
             label="Content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             sx={{ mt: 2 }}
-          />
+          /> */}
           <Button onClick={selectedArticleId ? handleUpdateArticle : handleAddArticle} variant="contained" color="primary" sx={{ mt: 2 }}>
             {selectedArticleId ? "Update Article" : "Add Article"}
           </Button>
         </Box>
       </Modal>
-      {selectedArticleId && (
+      {selectedArticleId && 
+      <>
         <SousArticle
           articleId={selectedArticleId}
           onClose={() => setSelectedArticleId(null)}
           onUpdate={() => handleUpdateArticle(selectedArticleId)} // Fixed typo here
         />
-      )}
+            <ArticleUser selectedArticleId={selectedArticleId}/>
+        </>
+      }
+  
     </Box>
   );
 };

@@ -10,6 +10,7 @@ import styles from "./ChatItem.module.css";
 
 import botIcon from "../../assets/logos/bot.png";
 import { useAuth } from "../../context/AuthContext";
+import React from "react";
 
 type Props = {
 	content: string;

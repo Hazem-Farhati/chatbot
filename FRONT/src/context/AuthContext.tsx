@@ -1,39 +1,40 @@
-import React,{ useState, useEffect,  createContext, useContext } from 'react';
-import { loginUser, checkAuthStatus, logoutUser, signupUser } from './../helpers/api-communicator';import Signup from './../pages/Signup';
+import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { loginUser, checkAuthStatus, logoutUser, signupUser } from './../helpers/api-communicator';
+import Signup from './../pages/Signup';
 
 type User = {
+    _id: string;
     name: string;
     email: string;
-    role:string;
+    role: string;
 };
 
 type UserAuth = {
     isLoggedIn: boolean;
     user: User | null;
-    token: string | null; // Add token to UserAuth
+    token: string | null;
     login: (email: string, password: string) => Promise<void>;
-    signup: (name: string,role:string, email: string, password: string) => Promise<void>;
-    logout: ()=> Promise<void>;
+    signup: (name: string, email: string, password: string, role: string) => Promise<void>;
+    logout: () => Promise<void>;
+    isAdmin: boolean;
 };
 
 const AuthContext = createContext<UserAuth | null>(null);
 
-export const AuthProvider = ({ children }: {children: ReactNode})=>{
-
-    const [user, setuser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    const [user, setUser] = useState<User | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [token, setToken] = useState<string | null>(null); // State to hold token
-     const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [token, setToken] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
     useEffect(() => {
-        // Fetch if the user's cookies are valid then skip login
         async function checkStatus() {
             const data = await checkAuthStatus();
-            if(data){
-                setuser({email: data.email, name: data.name, role: data.role});
+            if (data) {
+                setUser({ _id: data._id, email: data.email, name: data.name, role: data.role });
                 setIsLoggedIn(true);
-                setToken(data); // Set token from data
-                setIsAdmin(data.isAdmin);
+                setToken(data.token);
+                setIsAdmin(data.role === 'admin');
             }
         }
         checkStatus();
@@ -41,36 +42,28 @@ export const AuthProvider = ({ children }: {children: ReactNode})=>{
 
     const login = async (email: string, password: string) => {
         const data = await loginUser(email, password);
-        console.log("login data:",data);
-        if(data){
-            setuser({email: data.email, name: data.name , role: data.role});
+        if (data) {
+            setUser({ _id: data._id, email: data.email, name: data.name, role: data.role });
             setIsLoggedIn(true);
-            setToken(data);
-            setIsAdmin(data.isAdmin);
-           //window.location.href = "/";
+            setToken(data.token);
+            setIsAdmin(data.role === 'admin');
         }
     }
-    const signup = async (name: string, email: string, password: string,role:string) => {
-        const data = await signupUser(name, email, password);
-        if(data){
-            setuser({name: data.name, email: data.email, role:data.role});
 
+    const signup = async (name: string, email: string, password: string, role: string) => {
+        const data = await signupUser(name, email, password, role);
+        if (data) {
+            setUser({ _id: data._id, name: data.name, email: data.email, role: data.role });
         }
     }
+
     const logout = async () => {
         await logoutUser();
         setIsLoggedIn(false);
-        setuser(null);
-        setToken(null); // Clear token on logout
-     window.location.href = "/login";
+        setUser(null);
+        setToken(null);
+        window.location.href = "/login";
     }
-
-    //useEffect(() => {
-    //if (isLoggedIn) {
-      //  window.location.href = "/login";
-  //  }
-//}, [isLog]);
-
 
     const value = {
         user,
@@ -78,10 +71,12 @@ export const AuthProvider = ({ children }: {children: ReactNode})=>{
         login,
         logout,
         signup,
-         token,
-         isAdmin,
+        token,
+        isAdmin,
     };
+
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 };
 
 export const useAuth = () => useContext(AuthContext);
+    

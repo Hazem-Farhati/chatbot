@@ -83,6 +83,12 @@ const Header = () => {
               </Button>
             </>
           )}
+           {auth?.isLoggedIn && 
+           <Button>
+         <NavigationLink to="/all-articals" bg="black" text="View All articals" textColor="white" borderRadius="50px" />
+
+           </Button>
+           }
         </div>
       </Toolbar>
     </AppBar>
